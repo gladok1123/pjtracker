@@ -38,6 +38,6 @@ Join the Discord server: https://discord.gg/vyFhePgxh
 python -m PyInstaller --onefile --windowed --add-data "templates;templates" --add-data "icons;icons" --icon "icons/favicon.ico" --name "PJTracker" pjtracker_tray.py
 
 ## Screenshots
+<img width="1466" height="785" alt="Снимок экрана 2026-08-06 194123" src="https://github.com/user-attachments/assets/d3111762-9b50-4ab3-8650-68e50dec9649" />
 
-screenshot.png
 
