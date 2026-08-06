@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>PJTracker</title>
+    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+    <link rel="shortcut icon" href="/icons/favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #11111a;
+            --bg-card: #181825;
+            --bg-card-hover: #22223a;
+            --bg-sidebar: #0d0d16;
+            --text-primary: #e8e8f0;
+            --text-secondary: #a0a0b8;
+            --text-muted: #50506a;
+            --border-color: #22223a;
+            --accent: #6c63ff;
+            --accent-hover: #7b73ff;
+            --accent-glow: rgba(108, 99, 255, 0.2);
+            --green: #4ade80;
+            --green-glow: rgba(74, 222, 128, 0.15);
+            --blue: #60a5fa;
+            --blue-glow: rgba(96, 165, 250, 0.15);
+            --orange: #fb923c;
+            --red: #f87171;
+            --discord: #5865F2;
+            --discord-glow: rgba(88, 101, 242, 0.2);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --radius: 12px;
+            --sidebar-width: 220px;
+            --discord-width: 260px;
+            --details-width: 380px;
+        }
+
+        /* Космический фон */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            background-image: 
+                radial-gradient(ellipse at 10% 20%, rgba(108, 99, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(ellipse at 80% 70%, rgba(96, 165, 250, 0.10) 0%, transparent 40%),
+                radial-gradient(ellipse at 40% 40%, rgba(74, 222, 128, 0.06) 0%, transparent 35%),
+                radial-gradient(ellipse at 90% 10%, rgba(251, 146, 60, 0.05) 0%, transparent 40%),
+                repeating-linear-gradient(45deg, transparent 0px, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px);
+            background-attachment: fixed;
+            animation: bgPulse 25s ease-in-out infinite alternate, bgOrbit 40s linear infinite;
+        }
+
+        @keyframes bgPulse {
+            0% {
+                background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, auto;
+                filter: hue-rotate(0deg);
+            }
+            50% {
+                filter: hue-rotate(8deg);
+            }
+            100% {
+                background-size: 160% 160%, 160% 160%, 160% 160%, 160% 160%, auto;
+                filter: hue-rotate(-5deg);
+            }
+        }
+
+        @keyframes bgOrbit {
+            0% {
+                background-position: 0% 0%, 100% 100%, 50% 50%, 0% 100%;
+            }
+            25% {
+                background-position: 100% 0%, 0% 100%, 50% 50%, 100% 0%;
+            }
+            50% {
+                background-position: 100% 100%, 0% 0%, 50% 50%, 100% 0%;
+            }
+            75% {
+                background-position: 0% 100%, 100% 0%, 50% 50%, 0% 100%;
+            }
+            100% {
+                background-position: 0% 0%, 100% 100%, 50% 50%, 0% 100%;
+            }
+        }
+
+        /* Звёздное небо с мерцанием */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(1px 1px at 15% 25%, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 35% 55%, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1.5px 1.5px at 55% 15%, rgba(255,255,255,0.9), transparent),
+                radial-gradient(1px 1px at 75% 85%, rgba(255,255,255,0.6), transparent),
+                radial-gradient(2px 2px at 95% 35%, rgba(255,255,255,1.0), transparent),
+                radial-gradient(1px 1px at 20% 70%, rgba(255,255,255,0.4), transparent),
+                radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 5% 90%, rgba(255,255,255,0.3), transparent);
+            background-size: 250px 250px;
+            pointer-events: none;
+            z-index: 0;
+            animation: twinkle 5s ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .app-wrapper {
+            display: flex;
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            background: rgba(13, 13, 22, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px 16px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .sidebar .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--blue), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: logoGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes logoGlow {
+            0% { filter: drop-shadow(0 0 8px var(--accent-glow)); }
+            100% { filter: drop-shadow(0 0 30px var(--accent-glow)); }
+        }
+
+        .sidebar .logo span {
+            font-size: 0.65rem;
+            font-weight: 600;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            -webkit-text-fill-color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar .menu-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .sidebar .menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar .menu li {
+            display: flex;
+        }
+
+        .sidebar .menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.25s ease;
+            width: 100%;
+            border: 1px solid transparent;
+        }
+
+        .sidebar .menu a:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+            transform: translateX(4px);
+        }
+
+        .sidebar .menu a.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .sidebar .menu a .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar .menu a:hover .dot {
+            transform: scale(1.3);
+        }
+
+        .sidebar .menu a .dot.movies { background: #f87171; }
+        .sidebar .menu a .dot.tv { background: #60a5fa; }
+        .sidebar .menu a .dot.music { background: #a78bfa; }
+        .sidebar .menu a .dot.games { background: #4ade80; }
+        .sidebar .menu a .dot.pc { background: #fb923c; }
+        .sidebar .menu a .dot.software { background: #fbbf24; }
+        .sidebar .menu a .dot.all { background: var(--accent); }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-title .page-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .header-title .page-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .header-status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green-glow);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .tracker-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+            padding: 10px 14px;
+            background: rgba(17, 17, 26, 0.8);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            align-items: center;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        .tracker-bar .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 8px;
+        }
+
+        .tracker-btn {
+            padding: 0.4rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .tracker-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .tracker-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        #status-indicator {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-left: auto;
+            padding: 4px 12px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-form .input-group {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-form input[type="text"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(17, 17, 26, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            outline: none;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        .search-form input[type="text"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .search-form input[type="text"]::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-form button {
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .search-form button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        /* ================================================== */
+        /* 🌊 ЖИДКОЕ СТЕКЛО ДЛЯ ВСЕХ КНОПОК (Liquid Glass)   */
+        /* ================================================== */
+
+        .controls {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .controls button {
+            padding: 0.6rem 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            color: #fff;
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ✨ Блеск на стекле */
+        .controls button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 45deg, transparent, rgba(255,255,255,0.05), transparent, rgba(255,255,255,0.03), transparent);
+            animation: glassShine 6s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes glassShine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 🔥 У каждой кнопки СВОЙ уникальный цвет */
+        .controls button:nth-child(1) { background: rgba(108, 99, 255, 0.5); box-shadow: 0 4px 20px rgba(108, 99, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
+        .controls button:nth-child(2) { background: rgba(96, 165, 250, 0.5); box-shadow: 0 4px 20px rgba(96, 165, 250, 0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
+        .controls button:nth-child(3) { background: rgba(251, 146, 60, 0.5); box-shadow: 0 4px 20px rgba(251, 146, 60, 0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
+        .controls button:nth-child(4) { background: rgba(74, 222, 128, 0.5); box-shadow: 0 4px 20px rgba(74, 222, 128, 0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
+        .controls button:nth-child(5) { background: rgba(168, 85, 247, 0.5); box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
+
+        .controls button:hover {
+            transform: translateY(-3px) scale(1.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .controls button:active {
+            transform: scale(0.95);
+        }
+
+        .controls button.active {
+            background: rgba(255, 255, 255, 0.25) !important;
+            box-shadow: 0 4px 25px rgba(108, 99, 255, 0.5), inset 0 1px 0 rgba(255,255,255,0.3) !important;
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        /* ================================================== */
+
+        .discord-panel {
+            width: var(--discord-width);
+            min-width: var(--discord-width);
+            background: rgba(13, 13, 22, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px 16px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .discord-panel .discord-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(0 0 10px var(--discord-glow));
+        }
+
+        .discord-panel h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .discord-panel p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .discord-panel .discord-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 24px;
+            background: var(--discord);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .discord-panel .discord-btn:hover {
+            background: #4752C4;
+            transform: scale(1.03);
+            box-shadow: 0 4px 20px var(--discord-glow);
+        }
+
+        .details-panel {
+            width: var(--details-width);
+            min-width: var(--details-width);
+            background: rgba(13, 13, 22, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 20px 16px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: var(--shadow);
+            display: none;
+            flex-direction: column;
+        }
+
+        .details-panel.visible {
+            display: flex;
+        }
+
+        .details-panel .close-btn {
+            align-self: flex-end;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .details-panel .close-btn:hover {
+            color: var(--text-primary);
+            transform: scale(1.1);
+        }
+
+        .details-panel .detail-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .details-panel .detail-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .details-panel .detail-meta .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .details-panel .detail-meta .row .label {
+            color: var(--text-muted);
+        }
+
+        .details-panel .detail-meta .row .value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .details-panel .detail-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .details-panel .detail-download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: auto;
+        }
+
+        .details-panel .detail-download-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.02);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .results-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.12), rgba(96, 165, 250, 0.06));
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            border: none;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        .results-info .count {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .results-info .count strong {
+            color: var(--text-primary);
+        }
+
+        .results-info .query-display {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .game-card {
+            background: rgba(24, 24, 37, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent);
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: var(--shadow), 0 0 30px var(--accent-glow);
+        }
+
+        .game-card .card-top {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 0.75rem;
+        }
+
+        .game-card .poster {
+            width: 60px;
+            height: 80px;
+            flex-shrink: 0;
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+        }
+
+        .game-card .poster-placeholder {
+            width: 60px;
+            height: 80px;
+            flex-shrink: 0;
+            border-radius: 6px;
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+        }
+
+        .game-card .title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .game-card .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .game-card .meta span {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .game-card .meta .year {
+            color: var(--blue);
+            border-color: rgba(96, 165, 250, 0.2);
+            background: var(--blue-glow);
+        }
+
+        .game-card .meta .size {
+            color: var(--orange);
+            border-color: rgba(251, 146, 60, 0.2);
+            background: rgba(251, 146, 60, 0.1);
+        }
+
+        .game-card .meta .seeds {
+            color: var(--green);
+            border-color: rgba(74, 222, 128, 0.2);
+            background: var(--green-glow);
+        }
+
+        .game-card .meta .tracker {
+            color: var(--accent);
+            border-color: rgba(108, 99, 255, 0.2);
+            background: var(--accent-glow);
+        }
+
+        .game-card .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .game-card .footer .tracker-name {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .game-card .download-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.4rem 1rem;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .game-card .download-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .error {
+            padding: 1rem 1.25rem;
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            border-radius: var(--radius);
+            color: var(--red);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 400;
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1200px) {
+            .app-wrapper {
+                flex-wrap: wrap;
+            }
+            
+            .discord-panel {
+                width: 100%;
+                min-width: auto;
+                position: static;
+                order: 2;
+            }
+            
+            .details-panel {
+                width: 100%;
+                min-width: auto;
+                position: static;
+                order: 3;
+            }
+            
+            .main-content {
+                order: 1;
+                flex: 1 1 100%;
+            }
+            
+            .sidebar {
+                order: 0;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .app-wrapper {
+                flex-direction: column;
+                padding: 16px;
+            }
+
+            .sidebar {
+                width: 100%;
+                min-width: auto;
+                position: static;
+                padding: 16px;
+            }
+
+            .sidebar .menu {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .sidebar .menu li {
+                flex: 1;
+                min-width: 120px;
+            }
+            
+            .discord-panel {
+                order: 2;
+            }
+            
+            .details-panel {
+                order: 3;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .search-form .input-group {
+                min-width: 100%;
+            }
+
+            .results-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .sidebar .menu li {
+                min-width: 80px;
+            }
+            
+            .tracker-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .tracker-btn {
+                text-align: center;
+            }
+
+            #status-indicator {
+                margin-left: 0;
+                text-align: center;
+            }
+            
+            .details-panel {
+                padding: 16px;
+            }
+
+            .game-card .card-top {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .game-card .poster,
+            .game-card .poster-placeholder {
+                width: 80px;
+                height: 110px;
+            }
+
+            .game-card .title {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-card .meta {
+                flex-wrap: wrap;
+            }
+
+            .game-card .footer {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: stretch;
+            }
+
+            .game-card .download-btn {
+                justify-content: center;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        ::selection {
+            background: var(--accent);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside class="sidebar">
+            <div class="logo">
+                PJTracker
+                <span>v2.0</span>
+            </div>
+            
+            <div class="menu-label">Categories</div>
+            <ul class="menu">
+                <li>
+                    <a href="/" class="{% if not category %}active{% endif %}">
+                        <span class="dot all"></span>
+                        All
+                    </a>
+                </li>
+                <li>
+                    <a href="/category/1000?tracker={{ tracker }}&priority={{ priority }}" class="{% if category == '1000' %}active{% endif %}">
+                        <span class="dot movies"></span>
+                        Movies
+                    </a>
+                </li>
+                <li>
+                    <a href="/category/2000?tracker={{ tracker }}&priority={{ priority }}" class="{% if category == '2000' %}active{% endif %}">
+                        <span class="dot tv"></span>
+                        TV Series
+                    </a>
+                </li>
+                <li>
+                    <a href="/category/3000?tracker={{ tracker }}&priority={{ priority }}" class="{% if category == '3000' %}active{% endif %}">
+                        <span class="dot music"></span>
+                        Music
+                    </a>
+                </li>
+                <li>
+                    <a href="/category/4000?tracker={{ tracker }}&priority={{ priority }}" class="{% if category == '4000' %}active{% endif %}">
+                        <span class="dot games"></span>
+                        Games
+                    </a>
+                </li>
+                <li>
+                    <a href="/category/4050?tracker={{ tracker }}&priority={{ priority }}" class="{% if category == '4050' %}active{% endif %}">
+                        <span class="dot pc"></span>
+                        Games PC
+                    </a>
+                </li>
+                <li>
+                    <a href="/category/5000?tracker={{ tracker }}&priority={{ priority }}" class="{% if category == '5000' %}active{% endif %}">
+                        <span class="dot software"></span>
+                        Software
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="header-title">
+                    <div class="page-title">
+                        {% if category_name %}
+                            {{ category_name }}
+                        {% else %}
+                            Search
+                        {% endif %}
+                    </div>
+                    <div class="page-subtitle">
+                        {% if query %}
+                            &quot;{{ query }}&quot;
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="header-status">
+                    <span class="dot"></span>
+                    <span>Connected</span>
+                </div>
+            </header>
+
+            <div class="tracker-bar">
+                <span class="label">Tracker:</span>
+                <a href="/?q={{ query }}&category={{ category }}&tracker=all&priority={{ priority }}" class="tracker-btn {% if tracker == 'all' or not tracker %}active{% endif %}">All</a>
+                {% for t in trackers %}
+                <a href="/?q={{ query }}&category={{ category }}&tracker={{ t.id }}&priority={{ priority }}" class="tracker-btn {% if tracker == t.id %}active{% endif %}">{{ t.title }}</a>
+                {% endfor %}
+                
+                <span style="flex:1"></span>
+                
+                <form id="priority-form" style="display:inline;">
+                    <select id="priority-select" name="priority" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-primary); padding: 0.3rem 1rem; font-size: 0.8rem; cursor: pointer; outline: none;">
+                        <option value="">⭐ Без приоритета</option>
+                        {% for t in trackers %}
+                        <option value="{{ t.id }}" {% if priority == t.id %}selected{% endif %}>{{ t.title }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+
+                <span id="status-indicator">⚡ Connected</span>
+            </div>
+
+            <form class="search-form" action="/" method="GET" id="search-form">
+                <input type="hidden" name="tracker" value="{{ tracker }}">
+                <input type="hidden" name="category" value="{{ category }}">
+                <input type="hidden" name="priority" value="{{ priority }}" id="priority-hidden">
+                <div class="input-group">
+                    <input type="text" name="q" placeholder="Search torrents..." value="{{ query }}">
+                </div>
+                <button type="submit">Search</button>
+            </form>
+
+            <!-- 🌊 КНОПКИ С ЭФФЕКТОМ ЖИДКОГО СТЕКЛА -->
+            <div class="controls">
+                <button onclick="sortGames('title')">Name</button>
+                <button onclick="sortGames('year')">Year</button>
+                <button onclick="sortGames('size')">Size</button>
+                <button onclick="sortGames('seeds')">Seeds</button>
+                <button onclick="sortGames('tracker')">Tracker</button>
+            </div>
+
+            {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            {% if results %}
+            <div class="results-info">
+                <div class="count">
+                    Found <strong>{{ results|length }}</strong> results
+                    {% if query %}for "<strong>{{ query }}</strong>"{% endif %}
+                </div>
+                <div class="query-display">
+                    {{ results|length }} torrents
+                </div>
+            </div>
+
+            <div class="games-grid" id="games-grid">
+                {% for game in results %}
+                <div class="game-card"
+                     onclick="showDetails(this)"
+                     data-title="{{ game.Title }}"
+                     data-year="{{ game.Year }}"
+                     data-size="{{ game.Size }}"
+                     data-seeds="{{ game.Seeders }}"
+                     data-tracker="{{ game.Tracker }}"
+                     data-link="{{ game.Link }}"
+                     data-desc="{{ game.Description|default('Нет дополнительной информации.') }}"
+                     data-poster="{{ game.Poster }}">
+                    <div class="card-top">
+                        {% if game.Poster %}
+                        <img src="{{ game.Poster }}" class="poster" alt="Poster" onerror="this.style.display='none'; this.parentElement.querySelector('.poster-placeholder').style.display='flex';">
+                        <div class="poster-placeholder" style="display:none;">🎬</div>
+                        {% else %}
+                        <div class="poster-placeholder">🎬</div>
+                        {% endif %}
+                        <div class="title">{{ game.Title }}</div>
+                    </div>
+                    <div class="meta">
+                        {% if game.Year %}<span class="year">{{ game.Year }}</span>{% endif %}
+                        {% if game.Size %}<span class="size">{{ game.Size }}</span>{% endif %}
+                        {% if game.Seeders %}<span class="seeds">{{ game.Seeders }} seeds</span>{% endif %}
+                        {% if game.Tracker %}<span class="tracker">{{ game.Tracker }}</span>{% endif %}
+                    </div>
+                    <div class="footer">
+                        <span class="tracker-name">{{ game.Tracker }}</span>
+                        <a href="{{ game.Link }}" class="download-btn" target="_blank" onclick="event.stopPropagation()">Download</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+                {% if query %}
+                <div class="results-info">
+                    <div class="count">
+                        No results found for "<strong>{{ query }}</strong>"
+                    </div>
+                </div>
+                <div class="empty-state">
+                    <div class="icon">🔍</div>
+                    <h3>Nothing found</h3>
+                    <p>Try a different search query, category, or tracker</p>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="icon">⌨️</div>
+                    <h3>Start searching</h3>
+                    <p>Enter a query above, select a category, or choose a tracker</p>
+                </div>
+                {% endif %}
+            {% endif %}
+        </main>
+
+        <aside class="discord-panel">
+            <div class="discord-icon">💬</div>
+            <h3>Join our Discord</h3>
+            <p>Get support, share your feedback, and connect with the community!</p>
+            <a href="https://discord.gg/vyFhePgxh" target="_blank" class="discord-btn">
+                <span>▶</span> Join Discord
+            </a>
+        </aside>
+
+        <aside class="details-panel" id="details-panel">
+            <button class="close-btn" onclick="closeDetails()">✕</button>
+            <div class="detail-title" id="detail-title">Title</div>
+            <div class="detail-meta" id="detail-meta">
+                <div class="row"><span class="label">Year</span><span class="value" id="detail-year">—</span></div>
+                <div class="row"><span class="label">Size</span><span class="value" id="detail-size">—</span></div>
+                <div class="row"><span class="label">Seeds</span><span class="value" id="detail-seeds">—</span></div>
+                <div class="row"><span class="label">Tracker</span><span class="value" id="detail-tracker">—</span></div>
+            </div>
+            <div class="detail-desc" id="detail-desc">Description</div>
+            <div id="detail-poster-container" style="margin-bottom: 1rem; display: none;">
+                <img id="detail-poster" src="" alt="Poster" style="width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-color);">
+            </div>
+            <a href="#" id="detail-download-btn" class="detail-download-btn" target="_blank">⬇ Download</a>
+        </aside>
+    </div>
+
+    <script>
+        function showDetails(element) {
+            const panel = document.getElementById('details-panel');
+            
+            const title = element.dataset.title || 'Без названия';
+            const year = element.dataset.year || '—';
+            const size = element.dataset.size || '—';
+            const seeds = element.dataset.seeds || '0';
+            const tracker = element.dataset.tracker || '—';
+            const link = element.dataset.link || '#';
+            const desc = element.dataset.desc || 'Нет дополнительной информации.';
+            const poster = element.dataset.poster || '';
+
+            document.getElementById('detail-title').textContent = title;
+            document.getElementById('detail-year').textContent = year;
+            document.getElementById('detail-size').textContent = size;
+            document.getElementById('detail-seeds').textContent = seeds + ' seeds';
+            document.getElementById('detail-tracker').textContent = tracker;
+            document.getElementById('detail-desc').textContent = desc;
+            document.getElementById('detail-download-btn').href = link;
+
+            const posterContainer = document.getElementById('detail-poster-container');
+            const posterImg = document.getElementById('detail-poster');
+            if (poster && poster.trim() !== '') {
+                posterImg.src = poster;
+                posterContainer.style.display = 'block';
+            } else {
+                posterContainer.style.display = 'none';
+            }
+
+            panel.classList.add('visible');
+        }
+
+        function closeDetails() {
+            document.getElementById('details-panel').classList.remove('visible');
+        }
+
+        function sortGames(criteria) {
+            const grid = document.getElementById('games-grid');
+            const cards = Array.from(grid.children);
+            const priority = document.getElementById('priority-select').value;
+
+            cards.sort((a, b) => {
+                let valA = a.dataset[criteria];
+                let valB = b.dataset[criteria];
+
+                if (criteria === 'seeds') {
+                    return parseInt(valB) - parseInt(valA);
+                }
+
+                if (criteria === 'size') {
+                    const sizeA = parseSize(valA);
+                    const sizeB = parseSize(valB);
+                    return sizeB - sizeA;
+                }
+
+                if (criteria === 'year') {
+                    return parseInt(valB) - parseInt(valA);
+                }
+
+                return (valA || '').localeCompare(valB || '');
+            });
+
+            if (priority) {
+                cards.sort((a, b) => {
+                    const priorityA = a.dataset.tracker === priority ? 1 : 0;
+                    const priorityB = b.dataset.tracker === priority ? 1 : 0;
+                    return priorityB - priorityA;
+                });
+            }
+
+            grid.innerHTML = '';
+            cards.forEach(card => grid.appendChild(card));
+
+            document.querySelectorAll('.controls button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = Array.from(document.querySelectorAll('.controls button'))
+                .find(btn => btn.textContent.toLowerCase() === criteria);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+
+        function parseSize(sizeStr) {
+            if (!sizeStr) return 0;
+            const match = sizeStr.match(/([\d.]+)\s*([ГМК]?Б)/i);
+            if (!match) return 0;
+
+            const num = parseFloat(match[1]);
+            const unit = match[2].toUpperCase();
+
+            if (unit === 'ГБ') return num * 1024 * 1024 * 1024;
+            if (unit === 'МБ') return num * 1024 * 1024;
+            if (unit === 'КБ') return num * 1024;
+            return num;
+        }
+
+        document.getElementById('priority-select').addEventListener('change', function() {
+            document.getElementById('priority-hidden').value = this.value;
+            document.getElementById('search-form').submit();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            sortGames('seeds');
+        });
+    </script>
+</body>
+</html>
