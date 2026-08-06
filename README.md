@@ -39,4 +39,4 @@ python -m PyInstaller --onefile --windowed --add-data "templates;templates" --ad
 
 ## Screenshots
 
-screenshot.png
+https://screenshot.png
